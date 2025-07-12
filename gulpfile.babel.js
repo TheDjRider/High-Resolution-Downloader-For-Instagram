@@ -4,40 +4,44 @@ import webpack from 'webpack';
 import rimraf from 'rimraf';
 
 const plugins = loadPlugins();
-
 import contentWebpackConfig from './content/webpack.config';
 
-gulp.task('content-js', ['clean'], cb => {
+function clean(cb) {
+  rimraf('./build', cb);
+}
+
+function contentJs(cb) {
   webpack(contentWebpackConfig, (err, stats) => {
     if (err) throw new plugins.util.PluginError('webpack', err);
-
     plugins.util.log('[webpack]', stats.toString());
-
     cb();
   });
-});
+}
 
-gulp.task('copy-manifest', ['clean'], () => {
+function copyManifest() {
   return gulp.src('manifest.json').pipe(gulp.dest('./build'));
-});
+}
 
-gulp.task('copy-locales', ['clean'], function() {
+function copyLocales() {
   return gulp
-    .src(['./_locales/**/*'], {
-      base: '.',
-    })
+    .src(['./_locales/**/*'], { base: '.' })
     .pipe(gulp.dest('./build'));
-});
+}
 
-gulp.task('clean', cb => {
-  rimraf('./build', cb);
-});
+const build = gulp.series(
+  clean,
+  gulp.parallel(copyManifest, copyLocales, contentJs)
+);
 
-gulp.task('build', ['copy-manifest', 'copy-locales', 'content-js']);
+function watch() {
+  gulp.watch('content/**/*', build);
+  gulp.watch('injected_script.js', build);
+}
 
-gulp.task('watch', ['default'], () => {
-  gulp.watch('content/**/*', ['build']);
-  gulp.watch('injected_script.js', ['build']);
-});
-
-gulp.task('default', ['build']);
+gulp.task('clean', clean);
+gulp.task('content-js', contentJs);
+gulp.task('copy-manifest', copyManifest);
+gulp.task('copy-locales', copyLocales);
+gulp.task('build', build);
+gulp.task('watch', gulp.series(build, watch));
+gulp.task('default', build);

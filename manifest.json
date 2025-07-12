@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
@@ -8,12 +8,19 @@
     "48": "icon_48.png",
     "128": "icon_128.png"
   },
-  "version": "2.0.30",
+  "version": "2.1.0",
   "content_scripts": [
     {
       "matches": ["*://*.instagram.com/*"],
       "js": ["content.js"]
     }
   ],
-  "permissions": ["clipboardWrite"]
+  "permissions": ["clipboardWrite"],
+  "host_permissions": ["*://*.instagram.com/*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon_16.png", "icon_48.png", "icon_128.png"],
+      "matches": ["*://*.instagram.com/*"]
+    }
+  ]
 }
